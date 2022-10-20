@@ -1,0 +1,134 @@
+@startuml
+class AddSongToPlaylistActivity {
+    - playlistDao : PlaylistDao
+    - albumTrackDao : AlbumTrackDao
+    + AddSongToPlaylistActivity(PlaylistDao playlistDao, AlbumTrackDao albumTrackDao)
+    + handleRequest(AddSongToPlaylistRequest addSongToPlaylistRequest, Context context) : AddSongToPlaylistResult
+}
+
+interface RequestHandler
+
+class CreatePlaylistActivity {
+    - playlistDao : PlaylistDao
+    + CreatePlaylistActivity(PlaylistDao playlistDao)
+    + handleRequest(final CreatePlaylistRequest createPlaylistRequest, Context context) : CreatePlaylistResult
+}
+
+class GetPlaylistActivity {
+    - playlistDao : PlaylistDao
+    + GetPlaylistActivity(PlaylistDao playlistDao)
+    + handleRequest(final GetPlaylistRequest getPlaylistRequest, Context context) : GetPlaylistResult
+}
+
+class GetPlaylistSongsActivity {
+    - playlistDao : PlaylistDao
+    + GetPlaylistSongsActivity(PlaylistDao playlistDao)
+    + handleRequest(final GetPlaylistSongsRequest getPlaylistRequest, Context context) : GetPlaylistSongsResult
+}
+
+class UpdatePlaylistActivity {
+    - playlistDao : PlaylistDao
+    + UpdatePlaylistActivity(PlaylistDao playlistDao)
+    + handleRequest(final UpdatePlaylistRequest getPlaylistRequest, Context context) : UpdatePlaylistResult
+}
+
+class DynamoDBMapper
+
+class AlbumTrack {
+    - @DynamoDBHashKey asin : String
+    - @DynamoDBRangeKey trackNumber : Integer
+    - albumName : String
+    - songTitle : String
+}
+
+class AlbumTrackDao {
+    - dynamoDbMapper : DynamoDBMapper
+    + AlbumTrackDao(DynamoDBMapper dynamoDbMapper)
+    + getAlbumTrack(String asin, Integer trackNumber) : AlbumTrack
+}
+
+class Playlist {
+    - @DynamoDBHashKey id : String
+    - name : String
+    - customerId : String
+    - songCount : Integer
+    - tags : Set<String>
+    - songList : List<AlbumTrack>
+}
+
+class PlaylistDao {
+    - dynamoDbMapper : DynamoDBMapper
+    + PlaylistDao(DynamoDBMapper dynamoDbMapper)
+    + getPlaylist(String id) : Playlist
+
+}
+
+class AlbumTrackNotFoundException {
+    - serialVersionUID : long
+    + AlbumTrackNotFoundException()
+    + AlbumTrackNotFoundException(String message)
+    + AlbumTrackNotFoundException(Throwable cause)
+    + AlbumTrackNotFoundException(String message, Throwable cause)
+}
+
+
+class InvalidAttributeValueException {
+    - serialVersionUID : long
+    + InvalidAttributeValueException()
+    + InvalidAttributeValueException(String message)
+    + InvalidAttributeValueException(Throwable cause)
+    + InvalidAttributeValueException(String message, Throwable cause)
+
+}
+
+class PlaylistNotFoundException {
+    - serialVersionUID : long
+    + PlaylistNotFoundException()
+    + PlaylistNotFoundException(String message)
+    + PlaylistNotFoundException(Throwable cause)
+    + PlaylistNotFoundException(String message, Throwable cause)
+}
+
+class InvalidAttributeChangeException {
+    - serialVersionUID : long
+    + PlaylistNotFoundException()
+    + PlaylistNotFoundException(String message)
+    + PlaylistNotFoundException(Throwable cause)
+    + PlaylistNotFoundException(String message, Throwable cause)
+}
+
+class InvalidAttributeActionException {
+    - serialVersionUID : long
+    + PlaylistNotFoundException()
+    + PlaylistNotFoundException(String message)
+    + PlaylistNotFoundException(Throwable cause)
+    + PlaylistNotFoundException(String message, Throwable cause)
+}
+
+class RuntimeException
+
+
+GetPlaylistActivity ..|> RequestHandler
+GetPlaylistActivity *-- PlaylistDao
+
+CreatePlaylistActivity ..|> RequestHandler
+CreatePlaylistActivity *-- PlaylistDao
+
+UpdatePlaylistActivity ..|> RequestHandler
+UpdatePlaylistActivity *-- PlaylistDao
+
+GetPlaylistSongsActivity ..|> RequestHandler
+GetPlaylistSongsActivity *-- PlaylistDao
+
+AddSongToPlaylistActivity ..|> RequestHandler
+AddSongToPlaylistActivity *-- PlaylistDao
+AddSongToPlaylistActivity *-- AlbumTrackDao
+
+Playlist *-- AlbumTrack
+
+AlbumTrackNotFoundException --|> RuntimeException
+InvalidAttributeValueException --|> InvalidAttributeActionException
+InvalidAttributeChangeException --|> InvalidAttributeActionException
+InvalidAttributeActionException --|> RuntimeException
+PlaylistNotFoundException --|> RuntimeException
+@enduml
